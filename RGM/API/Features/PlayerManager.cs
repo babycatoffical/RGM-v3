@@ -25,19 +25,16 @@ namespace RGM.API.Features
 {
     public static class PlayerManager
     {
-        public static List<Player> List
-        {
-            get => Main.Instance.Config.FixedModes.Count() > 0 ? Player.List.ToList() : Player.List.Where(x => x.IsNPC ? true : (!x.IsDND() && !x.IsNonePlayer())).ToList();
-        }
+        public static List<Player> List => Main.Instance.Config.FixedModes.Any() ? Player.List.ToList() : Player.List.Where(x => x.IsNPC || (!x.IsDND() && !x.IsNonePlayer())).ToList();
 
         public static bool IsUsingTranslator(this Player player)
         {
-            return Main.Instance.Config.FixedModes.Count() > 0 ? false : TranslatorPlayers[player] != "ko";
+            return Main.Instance.Config.FixedModes.Any() && TranslatorPlayers[player] != "ko";
         }
 
         public static bool IsDND(this Player player)
         {
-            return Main.Instance.Config.FixedModes.Count() > 0 ? false : UsersManager.UsersCache[player.UserId][23] == "1";
+            return !Main.Instance.Config.FixedModes.Any() && UsersManager.UsersCache[player.UserId][23] == "1";
         }
 
         public static bool IsNonePlayer(this Player player)
@@ -68,14 +65,14 @@ namespace RGM.API.Features
 
             if (!PlayersAudio.ContainsKey(player))
             {
-                AudioPlayer audioPlayer = AudioPlayer.CreateOrGet($"Player - {player.UserId}", condition: (hub) =>
+                AudioPlayer audioPlayer = AudioPlayer.CreateOrGet($"Player - {player.UserId}", condition: hub =>
                 {
                     Player ply = Player.Get(hub);
 
                     return (ply == player && !MuteBGMPlayers.Contains(ply)) ||
                     (player.CurrentSpectatingPlayers.Contains(ply) && !MuteBGMPlayers.Contains(ply));
                 }
-                , onIntialCreation: (p) =>
+                , onIntialCreation: p =>
                 {
                     Speaker speaker = p.AddSpeaker("Main", isSpatial: false, minDistance: 0, maxDistance: 5000);
                 });
@@ -85,7 +82,7 @@ namespace RGM.API.Features
 
             if (!PlayersReport.ContainsKey(player.UserId))
             {
-                PlayersReport.Add(player.UserId, new PlayerReport()
+                PlayersReport.Add(player.UserId, new PlayerReport
                 {
                     Kill = 0,
                     Death = 0,
@@ -112,7 +109,7 @@ namespace RGM.API.Features
             byte applyIntensity = (byte)Math.Min(EffectIntensities[player][type], MaxIntensity);
 
             var effect = player.ActiveEffects.FirstOrDefault(x => x.GetEffectType() == type);
-            float newDuration = effect != null && addDuration ? effect.Duration + duration : Math.Max(effect?.Duration ?? 0, duration);
+            float newDuration = effect && addDuration ? effect.Duration + duration : Math.Max(effect?.Duration ?? 0, duration);
 
             player.DisableEffect(type);
             player.EnableEffect(type, applyIntensity, duration == 0f ? 0f : newDuration);
@@ -169,7 +166,12 @@ namespace RGM.API.Features
         public static void Hit(this Player player, Player attacker, float damage)
         {
             attacker.ShowHitMarker(damage / 10);
-            player.Hurt(new DisruptorDamageHandler(new InventorySystem.Items.Firearms.ShotEvents.DisruptorShotEvent(InventorySystem.Items.ItemIdentifier.None, attacker.Footprint, InventorySystem.Items.Firearms.Modules.DisruptorActionModule.FiringState.FiringRapid), player.Position, damage));
+            player.Hurt(
+                new DisruptorDamageHandler(
+                    new InventorySystem.Items.Firearms.ShotEvents.DisruptorShotEvent
+                        (InventorySystem.Items.ItemIdentifier.None, attacker.Footprint, InventorySystem.Items.Firearms.Modules.DisruptorActionModule.FiringState.FiringRapid)
+                , player.Position, 
+                damage));
         }
 
         public static bool HasKeycardPermission(this Player player, KeycardPermissions permissions, bool requiresAllPermissions = false)
@@ -196,7 +198,8 @@ namespace RGM.API.Features
                 response = "칭호추가 <player> <badge name>";
                 return false;
             }
-            else if (Badges.ContainsKey(args))
+
+            if (Badges.ContainsKey(args))
             {
                 List<string> uc = UsersManager.UsersCache[userId];
 
@@ -209,39 +212,32 @@ namespace RGM.API.Features
                     UsersManager.SaveUsers();
                     return true;
                 }
-                else
+                if (uc[10].Split('/').Contains(args))
                 {
-                    if (uc[10].Split('/').Contains(args))
-                    {
-                        response = "This player already have this badge.";
-                        return false;
-                    }
-                    else
-                    {
-                        uc[10] += $"/{args}";
-                        UsersManager.UsersCache[userId] = uc;
-                        response = "Successfully add badge.";
-
-                        UsersManager.SaveUsers();
-                        return true;
-                    }
+                    response = "This player already have this badge.";
+                    return false;
                 }
+                uc[10] += $"/{args}";
+                UsersManager.UsersCache[userId] = uc;
+                response = "Successfully add badge.";
+
+                UsersManager.SaveUsers();
+                return true;
+                
             }
-            else
-            {
-                response = "This badge is not exist.";
-                return false;
-            }
+
+            response = "This badge is not exist.";
+            return false;
         }
 
         public static bool AddCustom(this string userId, string args, out string response, ArraySegment<string>? arguments = null)
         {
-            if (arguments.HasValue && arguments.Value.Count < 2)
+            if (arguments is { Count: < 2 })
             {
                 response = "커스텀추가 <player> <custom feature name>";
                 return false;
             }
-            else if (Customizations.ContainsKey(args))
+            if (Customizations.ContainsKey(args))
             {
                 List<string> uc = UsersManager.UsersCache[userId];
 
@@ -254,39 +250,31 @@ namespace RGM.API.Features
                     UsersManager.SaveUsers();
                     return true;
                 }
-                else
+                if (uc[7].Split('/').Contains(args))
                 {
-                    if (uc[7].Split('/').Contains(args))
-                    {
-                        response = "This player already have this custom feature.";
-                        return false;
-                    }
-                    else
-                    {
-                        uc[7] += $"/{args}";
-                        UsersManager.UsersCache[userId] = uc;
-                        response = "Successfully add custom feature.";
-
-                        UsersManager.SaveUsers();
-                        return true;
-                    }
+                    response = "This player already have this custom feature.";
+                    return false;
                 }
+                uc[7] += $"/{args}";
+                UsersManager.UsersCache[userId] = uc;
+                response = "Successfully add custom feature.";
+
+                UsersManager.SaveUsers();
+                return true;
             }
-            else
-            {
-                response = "This custom feature is not exist.";
-                return false;
-            }
+            response = "This custom feature is not exist.";
+            return false;
         }
 
         public static bool AddKillEffect(this string userId, string args, out string response, ArraySegment<string>? arguments = null)
         {
-            if (arguments.HasValue && arguments.Value.Count < 2)
+            if (arguments is {  Count: < 2 })
             {
                 response = "킬이펙트추가 <player> <kill effect name>";
                 return false;
             }
-            else if (KillEffects.ContainsKey(args))
+
+            if (KillEffects.ContainsKey(args))
             {
                 List<string> uc = UsersManager.UsersCache[userId];
 
@@ -299,29 +287,20 @@ namespace RGM.API.Features
                     UsersManager.SaveUsers();
                     return true;
                 }
-                else
+                if (uc[3].Split('/').Contains(args))
                 {
-                    if (uc[3].Split('/').Contains(args))
-                    {
-                        response = "This player already have this kill effect.";
-                        return false;
-                    }
-                    else
-                    {
-                        uc[3] += $"/{args}";
-                        UsersManager.UsersCache[userId] = uc;
-                        response = "Successfully add kill effect.";
-
-                        UsersManager.SaveUsers();
-                        return true;
-                    }
+                    response = "This player already have this kill effect.";
+                    return false;
                 }
+                uc[3] += $"/{args}";
+                UsersManager.UsersCache[userId] = uc;
+                response = "Successfully add kill effect.";
+
+                UsersManager.SaveUsers();
+                return true;
             }
-            else
-            {
-                response = "This kill effect is not exist.";
-                return false;
-            }
+            response = "This kill effect is not exist.";
+            return false;
         }
 
         public static bool AddPaint(this string userId, string args, out string response, ArraySegment<string>? arguments = null)
