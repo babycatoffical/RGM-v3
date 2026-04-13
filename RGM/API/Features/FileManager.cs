@@ -145,8 +145,11 @@ namespace RGM.API.Features
 
         public static string CheckUser(string userId, int num)
         {
-            if (UsersCache.ContainsKey(userId) && num >= 0 && num < UsersCache[userId].Count)
-                return UsersCache[userId][num];
+            lock (_usersLock)
+            {
+                if (UsersCache.ContainsKey(userId) && num >= 0 && num < UsersCache[userId].Count)
+                    return UsersCache[userId][num];
+            }
 
             return null;
         }
