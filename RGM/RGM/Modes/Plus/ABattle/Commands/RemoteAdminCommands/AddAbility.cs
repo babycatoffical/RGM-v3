@@ -32,7 +32,24 @@ public class AddAbility : ICommand
                 }
 
                 foreach (var player in players)
-                    ABattle.Instance.AddAbility(player, ability);
+                    try
+                    {
+                        ABattle.Instance.AddAbility(player, ability);
+                    }
+                    catch (Exception e)
+                    {
+                        response = arguments.At(0) == "all"
+                            ? "모든 플레이어에게 역할을 지급하는 도중 예외 또는 오류가 발생하였습니다."
+                            : $"""
+                               플레이어에게 역할을 지급하는 도중 예외 또는 오류가 발생하였습니다.
+                               단, 능력 지급이 완료됬을 수 있으며, 단순 능력 지급 도중 문제일 수 있습니다.
+                               해당 문제는 로그에 기록됩니다.
+                               플레이어 이름: {player.Nickname} ID: {player.Id}
+                               """;
+                        
+                        Log.Error($"{e.Message} {e.StackTrace}");
+                        return false;
+                    }
             }
 
             response = "AddAbility Complete!";
