@@ -85,7 +85,7 @@ namespace RGM
 
             // ------------------------------------------------------------------------------------------------------
 
-            if (Instance.Config.FixedModes.Count() == 0)
+            if (!Instance.Config.FixedModes.Any())
             {
                 Exiled.Events.Handlers.Server.WaitingForPlayers += OnWaitingForPlayers;
                 Exiled.Events.Handlers.Server.RoundStarted += OnRoundStarted;
