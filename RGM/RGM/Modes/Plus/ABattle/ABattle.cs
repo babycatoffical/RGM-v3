@@ -585,9 +585,16 @@ public class ABattle : Mode
     }
 
     // 플레이어의 특정 능력 가져오기
+
     public Ability GetAbility(Player player, AbilityType type)
     {
         return GetAbilities(player).FirstOrDefault(x => x.Data.AbilityType == type);
+    }
+
+    // 플레이어의 모든 능력 가져오기
+    public List<Ability> GetAbility(Player player)
+    {
+        return GetAbilities(player);
     }
 
     // 플레이어가 특정 능력을 가지고 있는지 확인
@@ -1072,13 +1079,12 @@ public static class ABattleExtensions
         return ABattle.Instance.GetAbilities(player);
     }
 
-    public static Ability GetAbility(this Player player, AbilityType type)
-    {
-        return ABattle.Instance.GetAbility(player, type);
-    }
+    public static Ability GetAbility(this Player player, AbilityType type) 
+        => ABattle.Instance.GetAbility(player, type);
 
-    public static bool HasAbility(this Player player, AbilityType type)
-    {
-        return ABattle.Instance.HasAbility(player, type);
-    }
+    public static List<Ability> GetAbility(this Player player) 
+        => ABattle.Instance.GetAbility(player);
+
+    public static bool HasAbility(this Player player, AbilityType type) 
+        => ABattle.Instance.HasAbility(player, type);
 }
