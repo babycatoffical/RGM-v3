@@ -155,6 +155,7 @@
     <Compile Include="RGM\Modes\Lock\ABattle\Abilities\Dummy\UsedAdhesivePlaster.cs" />
     <Compile Include="RGM\Modes\Lock\ABattle\Abilities\Dummy\UsedPingHook.cs" />
     <Compile Include="RGM\Modes\Lock\ABattle\Abilities\Dummy\UsedSnakeHandRadio.cs" />
+    <Compile Include="RGM\Modes\Lock\ABattle\Abilities\Epic\AddWorkstation.cs" />
     <Compile Include="RGM\Modes\Lock\ABattle\Abilities\Epic\AN94.cs" />
     <Compile Include="RGM\Modes\Lock\ABattle\Abilities\Epic\AntiScp207.cs" />
     <Compile Include="RGM\Modes\Lock\ABattle\Abilities\Epic\Blink.cs" />

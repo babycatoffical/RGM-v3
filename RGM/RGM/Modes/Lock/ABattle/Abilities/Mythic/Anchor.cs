@@ -152,6 +152,7 @@ public class Anchor : Ability
 
     public void OnTogglingNoClip(TogglingNoClipEventArgs ev)
     {
+        if (ev.Player != Owner) return;
         Timing.RunCoroutine(Disable());
     }
 

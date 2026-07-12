@@ -15,8 +15,8 @@ namespace RGM.Modes;
 public static class EchoBattleCore
 {
     // 상태표는 우측 상단, 알림은 화면 중앙에 분리해 서로 가리지 않도록 배치합니다.
-    const float HintX = 240f;
-    const float HintY = 310f;
+    const float HintX = 420f;
+    const float HintY = 330f;
     const float NotificationX = 0f;
     const float NotificationY = 750f;
     const int MaxNotifications = 5;

@@ -12,8 +12,8 @@ namespace RGM.Modes;
 /// </summary>
 public static class EchoGrowth
 {
-    public const float LevelExpMultiplier = 1.07f;
-    public const float LevelExpAdd = 15f;
+    public const float LevelExpMultiplier = 1.05f;
+    public const float LevelExpAdd = 20f;
 
     /// <summary>
     /// 같은 프레임/짧은 구간에 GrantExp가 여러 번 호출되어도 ApplyLoadout은 1회만 예약.

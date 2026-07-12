@@ -411,7 +411,6 @@ public enum AbilityType
     EPIC_PRIEST, // [영웅] 성직자
     EPIC_ADDWORKSTATION, // [영웅] 업무 증가
     EPIC_MADSCIENTIST, // [영웅] 매드 사이언티스트
-    EPIC_FORWARDLOOKING, // [영웅] 전방주시태만
     EPIC_SCP127, // [영웅] 인생의 동반자
     EPIC_ANTISCP207, // [영웅] 초재생
     EPIC_FOODRESEARCHER, // [영웅] 요리 연구가,

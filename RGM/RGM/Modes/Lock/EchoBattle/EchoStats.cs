@@ -2,6 +2,7 @@ using Exiled.API.Enums;
 using Exiled.API.Features;
 using Exiled.API.Features.DamageHandlers;
 using Exiled.Events.EventArgs.Player;
+using InventorySystem.Items.Firearms.Modules;
 using MEC;
 using PlayerRoles;
 using PlayerStatsSystem;
@@ -45,21 +46,21 @@ public static class EchoStats
 
     static readonly Dictionary<EchoSubOptionType, float[]> SubOptionValues = new()
     {
-        { EchoSubOptionType.AttackPercent, [6.5f, 7.4f, 8.3f, 9.2f, 10.1f, 11.0f] },
+        { EchoSubOptionType.AttackPercent, [6.0f, 6.8f, 7.6f, 8.4f, 9.2f, 10.0f] },
         { EchoSubOptionType.AttackFlat, [5f, 7f, 9f, 11f, 13f, 15f] },
-        { EchoSubOptionType.DefensePercent, [8.0f, 9.0f, 10.0f, 11.0f, 12.0f, 13.0f] },
+        { EchoSubOptionType.DefensePercent, [10.0f, 11.0f, 12.0f, 13.0f, 14.0f, 15.0f] },
         { EchoSubOptionType.DefenseFlat, [9.4f, 10.0f, 10.6f, 11.2f, 11.8f, 12.4f] },
-        { EchoSubOptionType.HpPercent, [10.2f, 11.1f, 12.0f, 12.9f, 13.8f, 14.7f] },
+        { EchoSubOptionType.HpPercent, [10.5f, 11.6f, 12.7f, 13.8f, 14.9f, 16.0f] },
         { EchoSubOptionType.HpFlat, [90f, 102f, 114f, 126f, 138f, 150f] },
         { EchoSubOptionType.CriticalChance, [6.9f, 7.5f, 8.1f, 8.7f, 9.3f, 9.9f] },
         { EchoSubOptionType.ScpDamagePercent, [8.3f, 9.6f, 10.9f, 12.2f, 13.5f, 14.8f] },
         { EchoSubOptionType.HumanDamagePercent, [8.3f, 9.6f, 10.9f, 12.2f, 13.5f, 14.8f] },
-        { EchoSubOptionType.MoveSpeed, [7.0f, 8.0f, 9.0f, 10.0f, 11.0f, 12.0f] },
-        { EchoSubOptionType.JumpPower, [3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f] },
-        { EchoSubOptionType.StaminaDrainReduction, [8.3f, 9.2f, 10.1f, 11.0f, 11.9f, 12.8f] },
-        { EchoSubOptionType.HeadshotDamage, [22.8f, 24.5f, 26.2f, 27.9f, 29.6f, 31.3f] },
-        { EchoSubOptionType.SizeReduction, [2.8f, 3.5f, 4.2f, 4.9f, 5.6f, 6.3f] },
-        { EchoSubOptionType.HealingBonus, [30.0f, 36.0f, 42.0f, 48.0f, 54.0f, 60.0f] },
+        { EchoSubOptionType.MoveSpeed, [10.0f, 11.0f, 12.0f, 13.0f, 14.0f, 15.0f] },
+        { EchoSubOptionType.JumpPower, [5.0f, 6.0f, 7.0f, 8.0f, 9.0f, 10.0f] },
+        { EchoSubOptionType.StaminaDrainReduction, [10.7f, 11.5f, 12.3f, 13.1f, 13.9f, 14.7f] },
+        { EchoSubOptionType.HeadshotDamage, [23.8f, 26.1f, 28.4f, 30.7f, 33.0f, 35.3f] },
+        { EchoSubOptionType.SizeReduction, [4.8f, 5.5f, 6.2f, 6.9f, 7.6f, 8.3f] },
+        { EchoSubOptionType.HealingBonus, [55.0f, 64.0f, 73.0f, 82.0f, 91.0f, 100.0f] },
     };
 
     public static float LerpStat(float min, float max, int level)
@@ -82,7 +83,7 @@ public static class EchoStats
         {
             (EchoCost.Cost4, EchoMainStatType.AttackPercent) => LerpStat(6.6f, 33.0f, level),
             (EchoCost.Cost4, EchoMainStatType.HpPercent) => LerpStat(12.5f, 62.5f, level),
-            (EchoCost.Cost4, EchoMainStatType.Defense) => LerpStat(5.0f, 25.0f, level),
+            (EchoCost.Cost4, EchoMainStatType.Defense) => LerpStat(6.0f, 30.0f, level),
             (EchoCost.Cost4, EchoMainStatType.CriticalChance) => LerpStat(4.4f, 22.0f, level),
             (EchoCost.Cost4, EchoMainStatType.MoveSpeedAndJump) => LerpStat(12.0f, 60.0f, level),
             (EchoCost.Cost4, EchoMainStatType.StaminaDrainReduction) => LerpStat(8.8f, 44.0f, level),
@@ -184,9 +185,9 @@ public static class EchoStats
     {
         return cost switch
         {
-            EchoCost.Cost4 => LerpStat(7f, 70f, level),
-            EchoCost.Cost3 => LerpStat(35f, 175f, level),
-            EchoCost.Cost1 => LerpStat(15f, 200f, level),
+            EchoCost.Cost4 => LerpStat(7f, 75f, level),
+            EchoCost.Cost3 => LerpStat(40f, 200f, level),
+            EchoCost.Cost1 => LerpStat(20f, 200f, level),
             _ => 0f
         };
     }
@@ -579,7 +580,7 @@ public static class EchoStats
             EchoInfo.PlayerBaseMaxHealth[player] = baseMax;
         }
 
-        float newMax = baseMax * (1f + snapshot.HpPercent / 100f) + snapshot.HpFlat;
+        float newMax = (baseMax + snapshot.HpFlat) * (1f + snapshot.HpPercent / 100f);
         float ratio = player.Health / Math.Max(1f, player.MaxHealth);
         player.MaxHealth = newMax;
         player.Health = Mathf.Clamp(newMax * ratio, 1f, newMax);
@@ -698,9 +699,10 @@ public static class EchoStats
             if (!ignoresAttackModifiers)
             {
                 float damage = ev.DamageHandler.Damage;
+                int attackFlatHitScale = GetBuckshotAttackFlatHitScale(ev);
 
+                damage += atkStats.AttackFlat / attackFlatHitScale;
                 damage *= 1f + atkStats.AttackPercent / 100f;
-                damage += atkStats.AttackFlat;
 
                 if (ev.Player.IsScp)
                     damage *= 1f + atkStats.ScpDamagePercent / 100f;
@@ -737,9 +739,10 @@ public static class EchoStats
             && !ignoresAttackModifiers)
         {
             float dmg = ev.DamageHandler.Damage;
+            bool ignoresDefensePercent = ev.DamageHandler.Type == DamageType.PocketDimension;
 
-            // 이벤트에서 직접 계산해야 특정 공격자 역할이 방어력%와 고정 방어력을 모두 우회할 수 있다.
-            if (defStats.DefensePercent > 0f)
+            // PocketDimension은 탈출 실패 판정 피해이므로 방어력%로 감소시키지 않는다.
+            if (defStats.DefensePercent > 0f && !ignoresDefensePercent)
                 dmg *= Mathf.Max(0f, 1f - defStats.DefensePercent / 100f);
 
             if (!DefenseFlatIgnoredDamageTypes.Contains(ev.DamageHandler.Type))
@@ -747,6 +750,35 @@ public static class EchoStats
 
             ev.DamageHandler.Damage = dmg;
         }
+    }
+
+    static int GetBuckshotAttackFlatHitScale(HurtingEventArgs ev)
+    {
+        if (ev.DamageHandler?.CustomBase is not Exiled.API.Features.DamageHandlers.FirearmDamageHandler
+            {
+                Item: Exiled.API.Features.Items.Firearm firearm
+            })
+            return 1;
+
+        if (!firearm.Base.TryGetModule<IHitregModule>(out var hitreg))
+            return 1;
+
+        if (hitreg is AttachmentDependentHitreg attachmentDependent)
+            hitreg = attachmentDependent.TargetModule;
+
+        if (hitreg is not BuckshotHitreg buckshot)
+            return 1;
+
+        int hitScale = Math.Max(1, buckshot.ActivePattern.MaxHits);
+
+        // Shotgun Double-shot은 한 번의 공격에서 두 Buckshot 패턴을 발사한다.
+        if (firearm.Type == ItemType.GunShotgun
+            && firearm.Base.TryGetModule<PumpActionModule>(out var pumpAction))
+        {
+            hitScale *= Math.Max(1, pumpAction.ShotsPerTriggerPull);
+        }
+
+        return hitScale;
     }
 
     public static void OnHealing(HealingEventArgs ev)
