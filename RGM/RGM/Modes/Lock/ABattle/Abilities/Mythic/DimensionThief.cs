@@ -1,7 +1,5 @@
 ﻿using Exiled.Events.EventArgs.Player;
-using MEC;
 using RGM.API.Features;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace RGM.Modes.Abilities.Mythic;
@@ -20,22 +18,13 @@ public class DimensionThief : Ability
         Exiled.Events.Handlers.Player.Dying -= OnDying;
     }
 
-    private IEnumerator<float> OnDying(DyingEventArgs ev)
+    private void OnDying(DyingEventArgs ev)
     {
-        if (ev.Attacker == null || ev.Attacker != Owner)
-            yield break;
+        if (ev.Attacker == null || ev.Attacker != Owner) return;
 
-        // 처치 시점의 능력 타입을 고정값으로 스냅샷 (반사경/복제 연쇄로 개수가 늘지 않도록)
-        List<AbilityType> abilityTypes =
-        [
-            .. ABattle.Instance.PlayerAbilities[ev.Player]
-                .Select(a => a.Data.AbilityType)
-        ];
-
-        yield return Timing.WaitForOneFrame;
-
-        if (!ev.Player.IsDead) yield break;
-        _ = ABattle.Instance.AddAbilityAsync(ev.Attacker, abilityTypes, allowReflector: false);
+        if (!ev.Player.IsDead) return;
+        _ = ABattle.Instance.AddAbilityAsync(ev.Attacker, [.. ABattle.Instance.PlayerAbilities[ev.Player]
+            .Select(a => a.Data.AbilityType)], allowReflector: false);
 
         ev.Player.AddHint("차원 강탈자", "능력을 강탈당했습니다!");
     }
