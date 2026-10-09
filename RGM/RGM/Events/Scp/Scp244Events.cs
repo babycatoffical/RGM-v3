@@ -1,7 +1,7 @@
 ﻿using MEC;
 using System.Collections.Generic;
 
-namespace RGM.EventArgs
+namespace RGM.Events
 {
     public static class Scp244Events
     {

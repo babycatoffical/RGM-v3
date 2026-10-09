@@ -1,4 +1,4 @@
-﻿namespace RGM.EventArgs
+﻿namespace RGM.Events
 {
     public static class Scp079Events
     {

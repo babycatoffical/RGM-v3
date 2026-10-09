@@ -24,7 +24,7 @@ using static RGM.IEnumerators.ServerIEnumerator;
 using static RGM.Variables.Variable;
 
 
-namespace RGM.EventArgs
+namespace RGM.Events
 {
     public static class PlayerEvents
     {

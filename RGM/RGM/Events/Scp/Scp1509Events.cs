@@ -3,7 +3,7 @@ using Exiled.Events.EventArgs.Scp1509;
 using MEC;
 using RGM.API.Features;
 
-namespace RGM.EventArgs
+namespace RGM.Events
 {
     public static class Scp1509Events
     {

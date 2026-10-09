@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace RGM.EventArgs
+namespace RGM.Events
 {
     public static class MEREvents
     {

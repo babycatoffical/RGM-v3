@@ -10,7 +10,7 @@ using System.Linq;
 using UnityEngine;
 using static RGM.Variables.Variable;
 
-namespace RGM.EventArgs
+namespace RGM.Events
 {
     public static class WarheadEvents
     {

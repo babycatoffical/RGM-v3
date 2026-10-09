@@ -409,7 +409,7 @@ namespace RGM.Modes
             if (!_juggernautExternalSupportWaves.Remove(ev.Wave))
                 return;
 
-            EventArgs.ServerEvents.CallTutorialSupport(ev.Players);
+            Events.ServerEvents.CallTutorialSupport(ev.Players);
         }
 
         private void Spawned(Player player)

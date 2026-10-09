@@ -13,7 +13,7 @@ using RGM.API.Features;
 using System.Linq;
 using UnityEngine;
 
-namespace RGM.EventArgs
+namespace RGM.Events
 {
     public static class Scp330Events
     {

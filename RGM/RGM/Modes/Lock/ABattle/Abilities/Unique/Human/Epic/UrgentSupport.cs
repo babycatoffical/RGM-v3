@@ -18,7 +18,7 @@ public class UrgentSupport : Ability
     {
         if (Owner.Role.Type == RoleTypeId.Tutorial)
         {
-            EventArgs.ServerEvents.CallTutorialSupport(Player.List.Where(player => player.IsDead));
+            Events.ServerEvents.CallTutorialSupport(Player.List.Where(player => player.IsDead));
             return;
         }
 
