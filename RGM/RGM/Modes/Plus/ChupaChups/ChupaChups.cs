@@ -6,6 +6,7 @@ using PlayerRoles;
 using RGM.API.Features;
 using System.Collections.Generic;
 using System.Linq;
+using LabApi.Events.Arguments.ServerEvents;
 using RGM.Patches;
 
 namespace RGM.Modes
@@ -31,9 +32,9 @@ namespace RGM.Modes
         public override void OnEnabled()
         {
             Exiled.Events.Handlers.Server.RespawningTeam += OnRespawningTeam;
-
             Exiled.Events.Handlers.Player.Spawned += OnSpawned;
-
+            // LabApi.Events.Handlers.ServerEvents.WaveRespawned += OnBackup;
+            
             _onModeStarted = Timing.RunCoroutine(OnModeStarted());
             _autoWarhead.RunCoroutine();
         }
@@ -42,37 +43,44 @@ namespace RGM.Modes
         {
             Exiled.Events.Handlers.Server.RespawningTeam -= OnRespawningTeam;
             Exiled.Events.Handlers.Player.Spawned -= OnSpawned;
+            // LabApi.Events.Handlers.ServerEvents.WaveRespawned -= OnBackup;
 
             Timing.KillCoroutines(_onModeStarted);
             _autoWarhead.KillCoroutine();
         }
 
-        public IEnumerator<float> OnModeStarted()
+        private IEnumerator<float> OnModeStarted()
         {
             yield return Timing.WaitForSeconds(1f);
 
             foreach (var player in PlayerManager.List.Where(x => x.IsAlive && x.Role.Type != RoleTypeId.Scp079))
-                Spawned(player);
-
-            yield break;
+                Spawned(player); 
         }
 
-        public void OnSpawned(SpawnedEventArgs ev)
+        private void OnSpawned(SpawnedEventArgs ev)
         {
             Spawned(ev.Player);
         }
 
-        public void Spawned(Player player)
+        private void Spawned(Player player)
         {
             Timing.WaitForSeconds(1);
 
             player.AddItem(ItemType.Jailbird);
         }
 
-        public void OnRespawningTeam(RespawningTeamEventArgs ev)
+        private void OnRespawningTeam(RespawningTeamEventArgs ev)
         {
             foreach (var player in PlayerManager.List.Where(x => x.IsAlive && x.IsScpRole() && x.Role.Type != RoleTypeId.Scp079))
                 Spawned(player);
+        }
+
+        private void OnBackup(WaveRespawnedEventArgs e)
+        {
+            foreach (var items in PlayerManager.List.Where(x => x.IsAlive && x.IsScpRole()))
+            {
+                items.AddItem(ItemType.Jailbird);
+            }
         }
     }
 }
