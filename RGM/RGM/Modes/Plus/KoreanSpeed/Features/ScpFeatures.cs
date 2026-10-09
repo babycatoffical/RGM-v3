@@ -8,13 +8,12 @@ using LabApi.Events.Arguments.Scp049Events;
 using MEC;
 using PlayerRoles;
 using RGM.API.Features;
-using RGM.Modes.Interfaces;
 using UnityEngine;
 using Scp049Role = Exiled.API.Features.Roles.Scp049Role;
 
 namespace RGM.Modes;
 
-public class ScpFeatures : ILogicFeatures
+public class ScpFeatures
 {
     private const float WaitTime = .2f;
     private static bool _isRunning;
@@ -64,20 +63,18 @@ public class ScpFeatures : ILogicFeatures
             }
             else
             {
-                Scp096Effect();
-                Scp049Effect();
-                Scp106Effect();
+                RunEffect();
                 Scp079Effect();
                 Scp173Effect();
-                Scp3114Effect();
-                Scp939Effect();
                 yield return Timing.WaitForSeconds(SpeedStore.Sin(WaitTime));
             }
         }
     }
 
-    private static void Scp096Effect()
+    // NOTE: 대부분의 SCP 기능은 이곳에 있습니다 (특수 기능이 있어야 할 경우 분리)
+    private static void RunEffect()
     {
+        // SCP-096
         foreach (var player in PlayerManager.List.Where(target =>
                      target != null && target.IsScpRole() && target.Role.Type == RoleTypeId.Scp096 && !target.IsNPC ))
         {
@@ -87,10 +84,8 @@ public class ScpFeatures : ILogicFeatures
                 scp096.ChargeCooldown =
                     Mathf.Max(0.0f, scp096.ChargeCooldown - SpeedStore.Count * SpeedStore.ScpMultiplier);
         }
-    }
-
-    private static void Scp106Effect()
-    {
+        
+        // SCP-106
         foreach (var player in PlayerManager.List.Where(target =>
                      target != null && target.IsScpRole() && target.Role.Type == RoleTypeId.Scp106 && !target.IsNPC))
         {
@@ -100,10 +95,8 @@ public class ScpFeatures : ILogicFeatures
                 scp106.RemainingSinkholeCooldown = Mathf.Max(0.0f,
                     scp106.RemainingSinkholeCooldown - SpeedStore.Count * SpeedStore.ScpMultiplier);
         }
-    }
-
-    private static void Scp939Effect()
-    {
+        
+        // SCP-939
         foreach (var player in PlayerManager.List.Where(target =>
                      target != null && target.IsScpRole() && target.Role.Type == RoleTypeId.Scp939 && !target.IsNPC))
         {
@@ -121,10 +114,8 @@ public class ScpFeatures : ILogicFeatures
                 scp939.MimicryCooldown =
                     Mathf.Max(0.0f, scp939.MimicryCooldown - SpeedStore.Count * SpeedStore.ScpMultiplier);
         }
-    }
-
-    private static void Scp049Effect()
-    {
+        
+        // SCP-049
         foreach (var player in PlayerManager.List.Where(target =>
                      target != null && target.IsScpRole() && target.Role.Type == RoleTypeId.Scp049 && !target.IsNPC))
         {
@@ -142,6 +133,16 @@ public class ScpFeatures : ILogicFeatures
                 scp049.RemainingAttackCooldown = Mathf.Max(0.0f,
                     scp049.RemainingAttackCooldown - SpeedStore.Count * SpeedStore.ScpMultiplier);
             }
+        }
+        
+        // SCP-3114
+        foreach (var player in
+                 PlayerManager.List.Where(target =>
+                     target != null && target.IsScp && target.Role.Type == RoleTypeId.Scp3114 && !target.IsNPC))
+        {
+            if (player.Role is not Scp3114Role scp3114) continue;
+
+            scp3114.StaminaRegenMultiplier += SpeedStore.Count * SpeedStore.ScpMultiplier;
         }
     }
 
@@ -209,18 +210,6 @@ public class ScpFeatures : ILogicFeatures
 
                 yield return Timing.WaitForSeconds(SpeedStore.Cos(3f));
             }
-        }
-    }
-
-    private static void Scp3114Effect()
-    {
-        foreach (var player in
-                 PlayerManager.List.Where(target =>
-                     target != null && target.IsScp && target.Role.Type == RoleTypeId.Scp3114 && !target.IsNPC))
-        {
-            if (player.Role is not Scp3114Role scp3114) continue;
-
-            scp3114.StaminaRegenMultiplier += SpeedStore.Count * SpeedStore.ScpMultiplier;
         }
     }
 

@@ -70,7 +70,10 @@ public static class PlayerFeatures
         {
             Log.Error($"Error while adding effects, Deception: {e.Message}");
         }
-        _loadMutex.ReleaseMutex();
+        finally
+        {
+            _loadMutex.ReleaseMutex();
+        }
     }
 
     internal static void UnloadEffects()
@@ -91,7 +94,10 @@ public static class PlayerFeatures
         {
             Log.Error($"Error while removing effects, Deception: {e.Message}");
         }
-        _unloadMutex.ReleaseMutex();
+        finally
+        {
+            _unloadMutex.ReleaseMutex();
+        }
     }
 
     private static void OnChanging(ChangingMicroHIDStateEventArgs ev)
@@ -108,9 +114,7 @@ public static class PlayerFeatures
                              x.Type == ItemType.MicroHID))
                 {
                     if (items is not MicroHid hid) continue;
-                    if (hid.Owner.IsNPC ) continue;
-                    if (hid.State is not MicroHidPhase.WindingUp) continue;
-                    if (hid.WindUpProgress >= 1) continue;
+                    if (hid.Owner.IsNPC || hid.WindUpProgress >= 1 || hid.State is not MicroHidPhase.WindingUp) continue;
 
                     hid.WindUpProgress += 0.1f;
                 }
@@ -119,9 +123,7 @@ public static class PlayerFeatures
                              x.Type == ItemType.MicroHID))
                 {
                     if (items is not MicroHid hid) continue;
-                    if (hid.Owner.IsNPC ) continue;
-                    if (hid.State is not MicroHidPhase.WindingDown) continue;
-                    if (hid.WindUpProgress <= 0) continue;
+                    if (hid.Owner.IsNPC || hid.State is not MicroHidPhase.WindingDown || hid.WindUpProgress <= 0) continue;
 
                     hid.WindUpProgress -= 0.1f;
                 }
@@ -131,11 +133,9 @@ public static class PlayerFeatures
         }
     }
 
-    private static void OnSearchingPickup(SearchingPickupEventArgs ev)
-        => ev.SearchTime -= SpeedStore.Count * 0.1f;
+    private static void OnSearchingPickup(SearchingPickupEventArgs ev) => ev.SearchTime -= SpeedStore.Count * 0.1f;
 
-    private static void OnThrowingRequest(ThrowingRequestEventArgs ev) 
-        => ev.Throwable.PinPullTime -= SpeedStore.Count * 0.1f;
+    private static void OnThrowingRequest(ThrowingRequestEventArgs ev) => ev.Throwable.PinPullTime -= SpeedStore.Count * 0.1f;
 
     private static void OnDied(DiedEventArgs ev)
     {

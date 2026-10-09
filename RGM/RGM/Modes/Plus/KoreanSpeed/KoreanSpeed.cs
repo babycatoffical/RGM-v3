@@ -36,7 +36,7 @@ public class KoreanSpeed : Mode
 
     public override void OnEnabled()
     {
-        SpeedStore.Ignition();
+        SpeedStore.Activate();
         PlayerFeatures.Activate();
         ScpFeatures.Start += AddPatches;
 

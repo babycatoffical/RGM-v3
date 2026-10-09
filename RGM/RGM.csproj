@@ -717,7 +717,6 @@
     <Compile Include="RGM\Modes\Plus\DogFight\DogFight.cs" />
     <Compile Include="RGM\Modes\Plus\ChupaChups\ChupaChups.cs" />
     <Compile Include="RGM\Modes\Plus\KoreanSpeed\Commands\SetCount.cs" />
-    <Compile Include="RGM\Modes\Plus\KoreanSpeed\Features\Interfaces\ILogicFeatures.cs" />
     <Compile Include="RGM\Modes\Plus\KoreanSpeed\Features\PlayerFeatures.cs" />
     <Compile Include="RGM\Modes\Plus\KoreanSpeed\Features\ScpFeatures.cs" />
     <Compile Include="RGM\Modes\Plus\KoreanSpeed\Variables\SpeedStore.cs" />

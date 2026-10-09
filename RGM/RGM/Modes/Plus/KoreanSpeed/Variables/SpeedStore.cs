@@ -34,7 +34,7 @@ public static class SpeedStore
     /// <summary>
     /// SpeedStore내 변수를 초기화합니다. (활성화)
     /// </summary>
-    public static void Ignition()
+    public static void Activate()
     {
         Count = 0;
         IsEnabled = true;

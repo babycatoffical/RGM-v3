@@ -12,7 +12,7 @@ public static class ScpPatch
     {
         try
         {
-            __result = Mathf.Max(0.0f, Scp049ResurrectDuration - SpeedStore.Count * .1f);
+            __result = Mathf.Max(0.2f, Scp049ResurrectDuration - SpeedStore.Count * .1f);
         }
         catch (Exception e)
         {
