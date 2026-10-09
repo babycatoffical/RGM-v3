@@ -92,14 +92,10 @@ namespace RGM.Modes
                 {
                     foreach (var player in PlayerManager.List)
                     {
-                        if (Physics.Raycast(player.Position, Vector3.down, out RaycastHit hit, 10, (LayerMask)1))
-                        {
-                            if (hit.transform.name == "classname=brush.003")
-                            {
-                                end = false;
-                                break;
-                            }
-                        }
+                        if (!Physics.Raycast(player.Position, Vector3.down, out RaycastHit hit, 10, (LayerMask)1) ||
+                            hit.transform.name != "classname=brush.003") continue;
+                        end = false;
+                        break;
                     }
 
                     yield return Timing.WaitForSeconds(1f);
