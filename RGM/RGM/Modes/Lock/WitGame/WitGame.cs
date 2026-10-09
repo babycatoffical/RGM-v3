@@ -29,8 +29,8 @@ namespace RGM.Modes
 
         int Stack = 0;
         int Remain = 0;
-        List<Player> JumpingPlayers = new List<Player>();
-        List<Player> PassPlayers = new List<Player>();
+        List<Player> JumpingPlayers = [];
+        List<Player> PassPlayers = [];
 
         CoroutineHandle _onModeStarted;
         CoroutineHandle _jumpHint;
