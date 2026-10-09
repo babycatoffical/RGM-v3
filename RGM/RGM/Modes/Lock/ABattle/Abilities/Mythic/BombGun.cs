@@ -48,7 +48,7 @@ public class BombGun : Ability
 
     private void OnShooting(ShootingEventArgs ev)
     {
-        if (ev.Player != Owner || ev.Item.Serial != _itemSerial) return;
+        if (ev.Item.Serial != _itemSerial) return;
         Throwable throwable = ev.Player.ThrowGrenade(ProjectileType.FragGrenade);
 
         Timing.RunCoroutine(ExplodeOnImpact(throwable));
