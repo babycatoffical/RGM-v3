@@ -250,7 +250,7 @@ public class ABattle : Mode
         const int mythicChance = 99;
         const int legendaryChance = 97;
         const int epicChance = 80;
-        const int explodeChance = 98;
+        const int explodeChance = 85;
         const int repeatCount = 5;
         const int explodeCount = 5;
 
