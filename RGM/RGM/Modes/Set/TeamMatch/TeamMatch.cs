@@ -52,6 +52,7 @@ namespace RGM.Modes
         private CoroutineHandle _onModeStarted;
         private CoroutineHandle _cleanupDecals;
         private CoroutineHandle _scoreHint;
+        private CoroutineHandle _userScan;
         private int _targetScore;
         private int _teamAScore;
         private int _teamBScore;
@@ -80,6 +81,7 @@ namespace RGM.Modes
             _onModeStarted = Timing.RunCoroutine(OnModeStarted());
             _cleanupDecals = Timing.RunCoroutine(CleanDecals());
             _scoreHint = Timing.RunCoroutine(ScoreHintCoroutine());
+            _userScan = Timing.RunCoroutine(UserScan());
         }
 
         public override void OnDisabled()
@@ -96,6 +98,7 @@ namespace RGM.Modes
             Timing.KillCoroutines(_onModeStarted);
             Timing.KillCoroutines(_cleanupDecals);
             Timing.KillCoroutines(_scoreHint);
+            Timing.KillCoroutines(_userScan);
 
             foreach (var door in Door.List)
                 door.Unlock();
@@ -282,6 +285,16 @@ namespace RGM.Modes
                     player.AddHint("팀 데스매치 점수", scoreText, 1.05f);
 
                 yield return Timing.WaitForSeconds(1f);
+            }
+        }
+
+        private IEnumerator<float> UserScan()
+        {
+            while (true)
+            {
+                yield return Timing.WaitForOneFrame;
+
+                if (PlayerManager.List.Count < 2) Round.EndRound();
             }
         }
 
