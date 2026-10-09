@@ -238,6 +238,7 @@ namespace RGM.Donator
 
             if (kE == "Lightning")
             {
+                PlaySound(_pos, "15", 3);
                 SchematicObject Lightning1 = ObjectSpawner.SpawnSchematic("LightningKE", new Vector3(_pos.x, _pos.y, _pos.z), rot);
                 yield return Timing.WaitForSeconds(0.25f);
                 Lightning1.Destroy();

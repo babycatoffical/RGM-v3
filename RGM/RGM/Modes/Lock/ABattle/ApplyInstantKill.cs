@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
 using CustomPlayerEffects;
 using Exiled.API.Features;
+using Exiled.Events.EventArgs.Player;
+using MEC;
 using PlayerStatsSystem;
 using static RGM.Variables.Variable;
 
@@ -11,6 +14,9 @@ namespace RGM.Modes;
 /// </summary>
 public static class ApplyInstantKill
 {
+    private const int RetryFrameCount = 3;
+    private static readonly HashSet<Player> PendingRetries = [];
+
     public static bool Apply(Player attacker, Player target)
     {
         if (attacker == null)
@@ -21,6 +27,22 @@ public static class ApplyInstantKill
 
         if (!target.IsAlive)
             return false;
+
+        bool applied = ApplyOnce(attacker, target, out bool dyingRaised);
+
+        // Damage requests made from a Hurting callback can be discarded while
+        // PlayerStatsSystem is still resolving the original hit. Retrying on a
+        // later server frame avoids that re-entrancy without turning a genuine
+        // Dying-event cancellation (such as a resurrection passive) into a kill.
+        if (!applied && !dyingRaised && target.IsAlive)
+            QueueRetry(attacker, target);
+
+        return applied;
+    }
+
+    private static bool ApplyOnce(Player attacker, Player target, out bool dyingRaised)
+    {
+        dyingRaised = false;
 
         // Crushed is ABattle's unblockable damage category. It bypasses damage
         // limits, reflection, and ability-based invulnerability while retaining
@@ -38,7 +60,15 @@ public static class ApplyInstantKill
             target.ReferenceHub.playerEffectsController.GetEffect<SpawnProtected>();
         byte spawnProtectionIntensity = spawnProtection.Intensity;
         float spawnProtectionTimeLeft = spawnProtection.TimeLeft;
+        bool detectedDying = false;
 
+        void OnDying(DyingEventArgs ev)
+        {
+            if (ev.Player == target)
+                detectedDying = true;
+        }
+
+        Exiled.Events.Handlers.Player.Dying += OnDying;
         try
         {
             target.IsGodModeEnabled = false;
@@ -50,6 +80,9 @@ public static class ApplyInstantKill
         }
         finally
         {
+            Exiled.Events.Handlers.Player.Dying -= OnDying;
+            dyingRaised = detectedDying;
+
             // A resurrection/passive may cancel death. Restore protections only
             // when the original player is still alive.
             if (target.IsAlive)
@@ -64,6 +97,35 @@ public static class ApplyInstantKill
                         spawnProtectionIntensity,
                         spawnProtectionTimeLeft);
             }
+        }
+    }
+
+    private static void QueueRetry(Player attacker, Player target)
+    {
+        if (!PendingRetries.Add(target))
+            return;
+
+        Timing.RunCoroutine(RetryOnLaterFrames(attacker, target));
+    }
+
+    private static IEnumerator<float> RetryOnLaterFrames(Player attacker, Player target)
+    {
+        try
+        {
+            for (int attempt = 0; attempt < RetryFrameCount; attempt++)
+            {
+                yield return Timing.WaitForOneFrame;
+
+                if (attacker == null || target == null || !target.IsAlive)
+                    yield break;
+
+                if (ApplyOnce(attacker, target, out bool dyingRaised) || dyingRaised)
+                    yield break;
+            }
+        }
+        finally
+        {
+            PendingRetries.Remove(target);
         }
     }
 }

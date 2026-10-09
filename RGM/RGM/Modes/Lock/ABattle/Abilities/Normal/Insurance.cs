@@ -7,10 +7,13 @@ using RGM.API.Features;
 namespace RGM.Modes.Abilities.Normal;
 
 [Ability("보험", "사망 판정을 받을 경우 1번 버텨냅니다.", AbilityCategory.Normal, AbilityType.NORMAL_INSURANCE)]
-public class Insurance : Ability
+public class Insurance : Ability, IDeathPreventionAbility
 {
     private static bool _isDetonatingState;
-    
+
+    // 낮은 등급의 사망 방어부터 소모한다.
+    public int DeathPreventionPriority => 100;
+
     public override void OnEnabled()
     {
         Exiled.Events.Handlers.Player.Dying += OnDying;
@@ -25,7 +28,8 @@ public class Insurance : Ability
 
     private void OnDying(DyingEventArgs ev)
     {
-        if (ev.Player != Owner || ABattle.Instance.IsLifeUsed[Owner] || Datas.BlockDamageTypes.Contains(ev.DamageHandler.Type) || _isDetonatingState)
+        if (ev.Player != Owner ||
+            !DeathPreventionResolver.IsSelected(this, ev.Attacker, ev.DamageHandler.Type))
             return;
 
         ev.IsAllowed = false;
@@ -38,6 +42,13 @@ public class Insurance : Ability
 
         ABattle.Instance.IsLifeUsed[Owner] = true;
         Timing.CallDelayed(Timing.WaitForOneFrame, () => ABattle.Instance.IsLifeUsed[Owner] = false);
+    }
+
+    public bool CanPreventDeath(Exiled.API.Features.Player attacker, Exiled.API.Enums.DamageType damageType)
+    {
+        return !DeathPreventionResolver.IsLifeUsed(Owner) &&
+               !Datas.BlockDamageTypes.Contains(damageType) &&
+               !_isDetonatingState;
     }
 
     private static void OnDetonating(DetonatingEventArgs e)

@@ -12,11 +12,14 @@ using RGM.Modes.Abilities.Synergy;
 namespace RGM.Modes.Abilities.Epic;
 
 [Ability("구사일생", "사망 판정을 받을 경우, 『생존』 효과를 2.5초간 부여하며, 체력을 27% 회복합니다. (최대 3번)", AbilityCategory.Epic, AbilityType.EPIC_SURVIVOR)]
-public class Survivor : Ability
+public class Survivor : Ability, IDeathPreventionAbility
 {
     private const float InvincibilityDuration = 2.5f;
 
     private static bool _isDetonatingState;
+
+    // 보험보다 나중, 리인카네이션보다 먼저 소모한다.
+    public int DeathPreventionPriority => 200;
 
     private int _power = 3;
     private bool _isEnabled;
@@ -62,7 +65,7 @@ public class Survivor : Ability
             return;
         }
 
-        if (TrySurvive())
+        if (DeathPreventionResolver.IsSelected(this, ev.Attacker, ev.DamageHandler.Type) && TrySurvive())
             ev.IsAllowed = false;
     }
 
@@ -76,6 +79,7 @@ public class Survivor : Ability
             ev.IsAllowed &&
             !IsExemptDamage(ev.Player, ev.DamageHandler.Type) &&
             IsLethalDamage(ev) &&
+            DeathPreventionResolver.IsSelected(this, ev.Attacker, ev.DamageHandler.Type) &&
             TrySurvive())
         {
             ev.IsAllowed = false;
@@ -96,6 +100,17 @@ public class Survivor : Ability
             return;
 
         ev.IsAllowed = false;
+    }
+
+    public bool CanPreventDeath(Player attacker, DamageType damageType)
+    {
+        if (IsExemptDamage(Owner, damageType) || WeakPointAttack.ShouldIgnoreDefenses(attacker))
+            return false;
+
+        if (_isEnabled)
+            return true;
+
+        return !DeathPreventionResolver.IsLifeUsed(Owner);
     }
 
     private bool TrySurvive()

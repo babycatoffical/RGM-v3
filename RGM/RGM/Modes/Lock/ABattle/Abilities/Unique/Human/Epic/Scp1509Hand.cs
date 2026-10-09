@@ -2,6 +2,7 @@
 using Exiled.API.Enums;
 using Exiled.Events.EventArgs.Player;
 using PlayerRoles;
+using RGM.API.DataBases;
 using RGM.API.Features;
 using RGM.Modes.Sets.AddScp.Scps;
 using SecretAPI.Extensions;
@@ -25,7 +26,7 @@ public class Scp1509Hand : Ability
 
     private void OnDied(DiedEventArgs ev)
     {
-        if (ev.Attacker == null || ev.Attacker != Owner) return;
+        if (ev.Attacker == null || ev.Attacker != Owner || Datas.BlockDamageTypes.Contains(ev.DamageHandler.Type)) return;
         if (ev.DamageHandler.Type is DamageType.PocketDimension or DamageType.Scp106) return;
         if (ev.Player.IsEffectActive<Corroding>()) return;
             

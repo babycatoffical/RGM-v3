@@ -34,6 +34,7 @@ public class RocketLauncher : Ability
     {
         if (ev.Attacker == null || 
             ev.Attacker != Owner || 
+            ev.Player == ev.Attacker ||
             !HitboxIdentity.IsEnemy(ev.Attacker.ReferenceHub, ev.Player.ReferenceHub))
             return;
         
@@ -44,7 +45,7 @@ public class RocketLauncher : Ability
         if (Convert.ToByte(Random.Range(1, 101)) <= GetPercent())
         {
             Tools.MessageTranslated("", $"{ev.Player.DisplayNickname}(<color={ev.Player.Role.Color.ToHex()}>{( Trans.Role[ev.Player.Role.Type])}</color>)(이)가 하늘로 승천했습니다.");
-            Timing.RunCoroutine(Tools.DoRocket(ev.Attacker, ev.Player, 1f, isInstantKill:true));
+            Timing.RunCoroutine(Tools.DoRocket(ev.Attacker, ev.Player));
         }
         
         Timing.CallDelayed(1, () =>

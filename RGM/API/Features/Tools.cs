@@ -1041,29 +1041,26 @@ $"""
             return $"#{colorValue:X6}";
         }
 
-        public static IEnumerator<float> DoRocket(Player attacker, Player player, float speed, bool isInstantKill = false)
+        public static IEnumerator<float> DoRocket(Player attacker, Player player, float speed = 1f)
         {
-            int amnt = 0;
+            float elapsed = 0f;
             while (player.Role != RoleTypeId.Spectator)
             {
                 player.Position += Vector3.up * speed;
-                int num = amnt;
-                amnt = num + 1;
-                bool flag = amnt >= 50;
-                if (flag)
+                elapsed += Time.deltaTime;
+                if (elapsed >= 0.9f)
                 {
-                    player.IsGodModeEnabled = false;
                     ExplosiveGrenade grenade = (ExplosiveGrenade)Item.Create(ItemType.GrenadeHE);
-                    grenade.FuseTime = 0.5f;
+                    grenade.FuseTime = 0.6f;
                     grenade.SpawnActive(player.Position, attacker);
-                    if (isInstantKill)
+                    player.IsGodModeEnabled = false;
+                    while (player.IsAlive)
                     {
                         ApplyInstantKill.Apply(attacker, player);
+                        yield return Timing.WaitForSeconds(0.2f);
                     }
-                    else
-                    {
-                        player.Hit(attacker, player.MaxHealth);
-                    }
+
+                    yield break;
                 }
 
                 yield return Timing.WaitForOneFrame;

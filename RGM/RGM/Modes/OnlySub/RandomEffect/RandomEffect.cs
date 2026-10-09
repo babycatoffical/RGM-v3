@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace RGM.Modes
 {
-    [Mode(ModeCategory.Public, ModeInfo.Plus, ModeType.RandomEffect)]
+    [Mode(ModeCategory.OnlySub, ModeInfo.Plus, ModeType.RandomEffect)]
     class RandomEffect : Mode
     {
         public override string Name => "랜덤효과";

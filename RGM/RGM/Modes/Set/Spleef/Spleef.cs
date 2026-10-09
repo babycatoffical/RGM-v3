@@ -27,9 +27,9 @@ namespace RGM.Modes
 
         public static Spleef Instance;
 
-        List<Player> pl = new List<Player>();
-        List<AdminToys.PrimitiveObjectToy> Transforms = new List<AdminToys.PrimitiveObjectToy>();
-        Dictionary<Player, float> OnGround = new Dictionary<Player, float>();
+        List<Player> pl = [];
+        List<AdminToys.PrimitiveObjectToy> Transforms = [];
+        Dictionary<Player, float> OnGround = new();
 
         CoroutineHandle _onModeStarted;
 
@@ -99,7 +99,7 @@ namespace RGM.Modes
                 {
                     if (Physics.Raycast(player.Position, Vector3.down, out RaycastHit hit, 3f, (LayerMask)1))
                     {
-                        OnGround[player] = 3;
+                        OnGround[player] = 1;
 
                         if (hit.transform.name == "Platform") 
                         {

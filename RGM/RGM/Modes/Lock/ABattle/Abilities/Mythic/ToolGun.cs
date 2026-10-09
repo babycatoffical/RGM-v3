@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Exiled.API.Features;
 using Exiled.API.Features.Items;
 using Exiled.Events.EventArgs.Player;
@@ -8,72 +7,63 @@ using ProjectMER.Features.Serializable;
 using RGM.API.Features;
 using UnityEngine;
 
-using static RGM.Variables.Variable;
-using Random = UnityEngine.Random;
-
 namespace RGM.Modes.Abilities.Mythic;
 
-[Ability("딸깍", "지급된 동전을 튕기면 보는 방향에 워크스테이션을 설치합니다. 단, 3% 확률로 즉사합니다.",
+[Ability("딸깍", """
+               지급된 동전을 튕기면 보는 방향에 워크스테이션을 설치합니다.
+               초기 획득 시 15회가 충전되며, 10초당 1개씩 추가되며 최대 20개까지 보유 가능합니다.
+               """,
     AbilityCategory.Mythic, AbilityType.MYTHIC_TOOLGUN)]
 public class ToolGun : Ability
 {
     private const float ForwardOffset = 1.5f;
     private const float DownwardOffset = 0.85f;
-    private const byte MaxCount = 20;
-    private const int WaitTime = 60;
+    private const byte InitialStacks = 15;
+    private const byte MaxStacks = 20;
+    private const float StackRecoveryInterval = 10f;
 
     private ushort _coinSerial;
-    private byte _count;
-    private byte _delay;
+    private byte _coinStacks;
     
     public override void OnEnabled()
     {
         Item coin = Owner.AddItem(ItemType.Coin);
         _coinSerial = coin.Serial;
+        _coinStacks = InitialStacks;
 
         Exiled.Events.Handlers.Player.ChangedItem += OnChangedItem;
         Exiled.Events.Handlers.Player.FlippingCoin += OnFlippingCoin;
+        Timing.RunCoroutine(RecoverStacks());
     }
-
+    
     private void OnChangedItem(ChangedItemEventArgs ev)
     {
         if (ev.Item?.Serial == _coinSerial)
         {
-            ev.Player.AddHint("동전 사용 설명", $"이 동전을 튕기면 <b><color={ABattle.RatingColor["신화"]}>워크스테이션</color></b>을 설치합니다.");
+            ev.Player.AddHint("동전 사용 설명", $"""
+                                           이 동전을 튕기면 <b><color={ABattle.RatingColor["신화"]}>워크스테이션</color></b>을 설치합니다,
+                                           현재 충전량: <b><color=#FFFF00>{_coinStacks}</color></b>
+                                           """);
         }
     }
 
     private void OnFlippingCoin(FlippingCoinEventArgs ev)
     {
+        Player player = ev.Player;
+        
         if (ev.Item.Serial != _coinSerial)
             return;
 
-        // if (_count >= MaxCount)
-        // {
-        //     _delay = WaitTime;
-        //     _count = 0;
-        //     Timing.RunCoroutine(CountRoutine());
-        // }
-        // if (_delay != 0)
-        // {
-        //     ev.Player.AddHint("딜레이",$"{_delay} 후 다시 사용해주세요.");
-        //     return;
-        // }
-
-        Player player = ev.Player;
-        if (Convert.ToByte(Random.Range(1, 101)) <= 3)
+        if (_coinStacks == 0)
         {
-            if (GodModePlayers.Contains(player))
-                GodModePlayers.Remove(player);
-            
-            player.RemoveAllAbilities();
-            player.Kill("욕심을 부리다가 아사했습니다.");
+            player.AddHint("","현재 충전된 워크스테이션이 없습니다.");
+            return;
         }
 
         Vector3 forward = player.CameraTransform.forward;
         forward.y = 0;
         forward.Normalize();
-        _count++;
+        _coinStacks--;
 
         Vector3 rayOrigin = player.Position + forward * ForwardOffset + Vector3.up;
         if (!Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hit, 100, (LayerMask)1))
@@ -88,12 +78,14 @@ public class ToolGun : Ability
         }.SpawnOrUpdateObject();
     }
 
-    private IEnumerator<float> CountRoutine()
+    private IEnumerator<float> RecoverStacks()
     {
-        while (_count != 0)
+        while (true)
         {
-            yield return Timing.WaitForSeconds(1f);
-            _count--;
+            yield return Timing.WaitForSeconds(StackRecoveryInterval);
+
+            if (_coinStacks < MaxStacks)
+                _coinStacks++;
         }
     }
 }

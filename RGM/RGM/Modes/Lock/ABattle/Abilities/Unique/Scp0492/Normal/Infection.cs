@@ -1,5 +1,6 @@
 ﻿using Exiled.Events.EventArgs.Player;
 using PlayerRoles;
+using RGM.API.DataBases;
 using RGM.API.Features;
 
 namespace RGM.Modes.Abilities.Unique.Scp0492.Normal;
@@ -20,7 +21,9 @@ public class Infection : Ability
 
     private void OnDied(DiedEventArgs ev)
     {
-        if (ev.Attacker == null || ev.Attacker != Owner)
+        if (ev.Attacker == null || 
+            ev.Attacker != Owner || 
+            Datas.BlockDamageTypes.Contains(ev.DamageHandler.Type))
             return;
 
         ev.Player.Role.Set(ev.Attacker.IsScpRole() ? RoleTypeId.Scp0492 : ev.Attacker.Role.Type, RoleSpawnFlags.None);

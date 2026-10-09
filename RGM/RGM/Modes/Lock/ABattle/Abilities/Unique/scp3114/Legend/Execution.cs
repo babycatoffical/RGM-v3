@@ -1,11 +1,11 @@
 using Exiled.API.Enums;
 using Exiled.Events.EventArgs.Player;
-using PlayerStatsSystem;
 
-namespace RGM.Modes.Abilities.Unique.Scp3114;
+namespace RGM.Modes.Abilities.Unique.Scp3114.Legend;
 
-[Ability("숙련된 암살자", "교살로 적을 즉시 처치할 수 있습니다.", AbilityCategory.Normal, AbilityType.NORMAL_SCP3114_SKILLEDASSASSIN, RoleAbility.Scp3114)]
-public class SkilledAssassin : Ability
+[Ability("참수", "자신의 교살 공격에 『사망』 효과가 적용됩니다.", 
+    AbilityCategory.Legend, AbilityType.NORMAL_SCP3114_SKILLEDASSASSIN, RoleAbility.Scp3114)]
+public class Execution : Ability
 {
     public override void OnEnabled()
     {
@@ -23,8 +23,9 @@ public class SkilledAssassin : Ability
             return;
 
         if (ev.DamageHandler.Type == DamageType.Strangled)
-            ev.Player.Kill(new ScpDamageHandler(
-                Owner.ReferenceHub,
-                DeathTranslations.Scp3114Slap));
+        {
+            ev.IsAllowed = false;
+            ApplyInstantKill.Apply(ev.Attacker, ev.Player);
+        }
     }
 }

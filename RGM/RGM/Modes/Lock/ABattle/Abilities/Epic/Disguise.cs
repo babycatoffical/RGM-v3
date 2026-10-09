@@ -10,7 +10,8 @@ using RGM.API.Features;
 
 namespace RGM.Modes.Abilities.Epic;
 
-[Ability("위장술", "항상 게임에서 유리한 세력의 모습을 지니게 됩니다.", AbilityCategory.Epic, AbilityType.EPIC_DISGUISE)]
+[Ability("위장술", "항상 게임에서 유리한 세력의 모습을 지니게 됩니다.",
+    AbilityCategory.Epic, AbilityType.EPIC_DISGUISE, isUnique:true)]
 public class Disguise : Ability
 {
     private readonly List<RoleTypeId> _blockedRoles =

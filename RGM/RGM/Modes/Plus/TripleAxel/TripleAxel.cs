@@ -88,7 +88,7 @@ COM-45로 인한 데미지가 77%로 하향됩니다.
 
         private void OnHurting(HurtingEventArgs ev)
         {
-            if (ev.Attacker != null && ev.Attacker.CurrentItem.Type == ItemType.GunCom45)
+            if (ev.Attacker?.CurrentItem?.Type == ItemType.GunCom45)
                 ev.DamageHandler.Damage *= 0.77f;
         }
 
@@ -102,7 +102,7 @@ COM-45로 인한 데미지가 77%로 하향됩니다.
             if (!player.IsAlive) return;
 
             if (player.Role.Type == RoleTypeId.Scp173)
-                player.Role.Set(ScpRoles.GetRandomValue());
+                Timing.CallDelayed(Timing.WaitForOneFrame, () => player.Role.Set(ScpRoles.GetRandomValue()));
 
             player.ClearAmmo();
             player.AddItem(ItemType.Flashlight);

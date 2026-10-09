@@ -14,13 +14,14 @@ using PlayerStatsSystem;
 using ProjectMER.Features;
 using ProjectMER.Features.Objects;
 using RGM.API.Interfaces;
+using RGM.Modes;
 using RGM.Modes.SubClass;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using static RGM.Variables.Variable;
-using Random = System.Random;
+using Random = UnityEngine.Random;
 
 namespace RGM.API.Features
 {
@@ -949,8 +950,7 @@ namespace RGM.API.Features
                 g.SpawnActive(pos.Value, player);
 
                 if (!instakill) return;
-                if (GodModePlayers.Contains(player)) GodModePlayers.Remove(player);
-                player.Kill(DamageType.Explosion);
+                ApplyInstantKill.Apply(player, player);
             }
         }
     }

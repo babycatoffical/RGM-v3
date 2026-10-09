@@ -34,17 +34,17 @@ namespace RGM.Modes
 
         public override void OnEnabled()
         {
-            Exiled.Events.Handlers.Player.Hurt += OnHurt;
+            Exiled.Events.Handlers.Player.Hurting += OnHurting;
             _autoWarhead.RunCoroutine();
         }
 
         public override void OnDisabled()
         {
-            Exiled.Events.Handlers.Player.Hurt -= OnHurt;
+            Exiled.Events.Handlers.Player.Hurting -= OnHurting;
             _autoWarhead.KillCoroutine();
         }
 
-        private void OnHurt(HurtEventArgs ev)
+        private void OnHurting(HurtingEventArgs ev)
         {
             if (ev.Attacker == null || 
                 !HitboxIdentity.IsEnemy(ev.Attacker.ReferenceHub, ev.Player.ReferenceHub) ||
@@ -57,7 +57,7 @@ namespace RGM.Modes
             if (Convert.ToByte(Random.Range(1, 101)) <= GetPercent())
             {
                 Tools.MessageTranslated("", $"{ev.Player.DisplayNickname}(<color={ev.Player.Role.Color.ToHex()}>{( Trans.Role[ev.Player.Role.Type])}</color>)(이)가 하늘로 승천했습니다.");
-                Timing.RunCoroutine(Tools.DoRocket(ev.Attacker, ev.Player, 1f));
+                Timing.RunCoroutine(Tools.DoRocket(ev.Attacker, ev.Player));
             }
 
             Timing.CallDelayed(1, () =>

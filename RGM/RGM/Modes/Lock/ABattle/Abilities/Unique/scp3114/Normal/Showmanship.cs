@@ -4,7 +4,7 @@ using Exiled.Events.EventArgs.Player;
 using MEC;
 using RGM.API.Features;
 
-namespace RGM.Modes.Abilities.Unique.Scp3114;
+namespace RGM.Modes.Abilities.Unique.Scp3114.Normal;
 
 //[Ability("쇼맨쉽", "춤추는 동안 지속적인 데미지를 받습니다. 대신 외부로부터 받는 데미지를 66% 줄입니다. <size=10>idea by 조용히게임함</size>", AbilityCategory.Common, AbilityType.NORMAL_SCP3114_SHOWMANSHIP, RoleAbility.Scp3114)]
 public class Showmanship : Ability

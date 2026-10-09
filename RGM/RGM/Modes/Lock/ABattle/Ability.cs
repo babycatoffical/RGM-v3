@@ -316,7 +316,6 @@ public enum AbilityType
     NORMAL_ESCAPE, // [일반] 위기 탈출
     NORMAL_FRIENDSHIP, // [일반] 우애
     NORMAL_RAINBOW, // [일반] 무지개
-    NORMAL_BODYBACK, // [일반] 바디백
     NORMAL_DOPAMINE, // [일반] 도파민
     NORMAL_TEST, // [일반] 시험
     NORMAL_AGILITY, // [일반] 민첩
@@ -332,6 +331,7 @@ public enum AbilityType
     NORMAL_NIGHTOWL, // [일반] 밤눈
     NORMAL_STUDY, // [일반] 공부
     NORMAL_HEREDITY, // [일반] 유전
+    NORMAL_FASTRETURN, // [일반] 빠른 복귀
 
     // 희귀 //
     RARE_PHYSICALSTRENGTHENING, // [희귀] 육체 강화
@@ -440,6 +440,9 @@ public enum AbilityType
     // 유니크 능력은 선택창에서 한 번만 획득 가능하며, 반사경이나 복제 등으로 능력 개수가 변동되지 않음.
     // 능력 강탈 또는 랜덤 획득을 통해서 능력을 획득할 때에도 유니크로 지정된 능력은 항상 1개로 적용.(없으면 가져오고, 있으면 제외)
 
+    // 유니크 일반    
+    NORMAL_BODYBACK, // [일반] 바디백
+    
     // 유니크 희귀
     RARE_SAVELOCATION, // [희귀] 위치 저장
 
@@ -476,6 +479,7 @@ public enum AbilityType
     LEGEND_HUMAN_SCP457, // [전용 전설] SCP-457, 불타는 남자
     LEGEND_HUMAN_SCP966, // [전용 전설] SCP-966, 잠을 죽이는 자
     LEGEND_HUMAN_SCP999, // [전용 전설] SCP-999, 간지럼 괴물
+    LEGEND_HUMAN_EMP, // [전용 전설] EMP
 
     // D계급
     NORMAL_CLASSD_LARCENY, // [전용 일반] 절도죄
@@ -587,6 +591,7 @@ public enum AbilityType
     
     EPIC_SCP106_RETURN, // [전용 영웅] 회귀
     EPIC_SCP106_EVADE, // [전용 영웅] 긴급 탈출
+    EPIC_SCP106_STEPPING, // [전용 영웅] 긴급 탈출
 
     LEGEND_SCP106_FLASHBACK, // [전용 전설] 회상
     
@@ -602,6 +607,7 @@ public enum AbilityType
     RARE_SCP939_BLEEDING, // [전용 희귀] 출혈
     
     EPIC_SCP939_AMNESIA, // [전용 영웅] 기억 소거
+    EPIC_SCP939_HEAVYINJURE, // [전용 영웅] 중상
     
     LEGEND_SCP939_EARTHQUAKE, // [전용 전설] 지진
 

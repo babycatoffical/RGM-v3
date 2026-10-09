@@ -19,7 +19,7 @@ namespace RGM.Modes
         public override string Description => "절대로 금지된 행동을 해선 안됩니다!";
         public override string Detail =>
 """
-5 ~ 180초 사이에 플레이어마다 금지된 행동이 변경됩니다.
+5 ~ 120초 사이에 플레이어마다 금지된 행동이 변경됩니다.
 금지된 행동이 고지되기 전에 2초 간 경고 시간이 주어집니다.
 
 금지된 행동을 하면 귀여워질 수 있습니다.
@@ -34,19 +34,19 @@ namespace RGM.Modes
 
         private enum BlockedActions
         {
-            달리기,
-            점프,
-            공격,
-            말하기,
-            아이템_사용,
-            문_상호작용,
-            발전기_열기,
-            카드키_들기,
-            총_들기,
-            의료_아이템_들기,
-            천천히_걷기,
-            탈출하기,
-            움직이기,
+            Running, // 달리기 금지
+            Jumping, // 점프 금지
+            Attacking, // 공격 금지
+            Speaking, // 말하기 금지
+            UsingItem, // 아이템사용 금지
+            InteractingDoor, // 문 상호작용 금지
+            OpenGenerator, // 발전기 열기 금지
+            HeldKeyCard, // 키카드 들기 금지
+            HeldGun, // 총 들기 금지
+            HeldMedicalItem, // 의료 아이템 들기 금지
+            WalkSlowly, // 천천히 걷기 금지
+            Escaping, // 탈출하기 금지
+            Moving, // 움직이기 금지
         }
 
         public override void OnEnabled()
@@ -93,12 +93,12 @@ namespace RGM.Modes
                 foreach (var room in Room.List)
                     room.ResetColor();
 
-                ushort time = (ushort)UnityEngine.Random.Range(5, 181);
+                ushort time = (ushort)UnityEngine.Random.Range(5, 121);
 
                 foreach (var player in PlayerManager.List)
                 {
                     if (!_dict.ContainsKey(player))
-                        _dict.Add(player, BlockedActions.달리기);
+                        _dict.Add(player, BlockedActions.Running);
 
                     var blockedAction = Tools.EnumToList<BlockedActions>().GetRandomValue();
                     _dict[player] = blockedAction;
@@ -125,19 +125,19 @@ namespace RGM.Modes
 
                         switch (blockedAction)
                         {
-                            case BlockedActions.달리기:
+                            case BlockedActions.Running:
                             {
                                 if (fpcModule.CurrentMovementState == PlayerMovementState.Sprinting)
                                     player.ExplodeGrenade(ignore: true);
                                 break;
                             }
-                            case BlockedActions.천천히_걷기:
+                            case BlockedActions.WalkSlowly:
                             {
                                 if (fpcModule.CurrentMovementState == PlayerMovementState.Sneaking)
                                     player.ExplodeGrenade(ignore: true);
                                 break;
                             }
-                            case BlockedActions.움직이기:
+                            case BlockedActions.Moving:
                             {
                                 if (!_posDict.ContainsKey(player))
                                     _posDict.Add(player, player.Position);
@@ -148,6 +148,19 @@ namespace RGM.Modes
                                 _posDict[player] = player.Position;
                                 break;
                             }
+                            case BlockedActions.Jumping:
+                            case BlockedActions.Attacking:
+                            case BlockedActions.Speaking:
+                            case BlockedActions.UsingItem:
+                            case BlockedActions.InteractingDoor:
+                            case BlockedActions.OpenGenerator:
+                            case BlockedActions.HeldKeyCard:
+                            case BlockedActions.HeldGun:
+                            case BlockedActions.HeldMedicalItem:
+                            case BlockedActions.Escaping:
+                                break;
+                            default:
+                                throw new ArgumentOutOfRangeException();
                         }
                     }
                     catch (Exception e)
@@ -165,7 +178,7 @@ namespace RGM.Modes
             if (ev.Player.IsDead)
                 return;
 
-            if (_dict.ContainsKey(ev.Player) && _dict[ev.Player] == BlockedActions.점프)
+            if (_dict.ContainsKey(ev.Player) && _dict[ev.Player] == BlockedActions.Jumping)
                 ev.Player.ExplodeGrenade(ignore: true);
         }
 
@@ -174,7 +187,7 @@ namespace RGM.Modes
             if (ev.Player.IsDead)
                 return;
 
-            if (ev.Attacker != null && _dict.ContainsKey(ev.Attacker) && _dict[ev.Attacker] == BlockedActions.공격)
+            if (ev.Attacker != null && _dict.ContainsKey(ev.Attacker) && _dict[ev.Attacker] == BlockedActions.Attacking)
                 ev.Attacker.ExplodeGrenade(ignore: true);
         }
 
@@ -183,7 +196,7 @@ namespace RGM.Modes
             if (ev.Player.IsDead)
                 return;
 
-            if (_dict.ContainsKey(ev.Player) && _dict[ev.Player] == BlockedActions.말하기 && !ev.Player.IsDead)
+            if (_dict.ContainsKey(ev.Player) && _dict[ev.Player] == BlockedActions.Speaking && !ev.Player.IsDead)
                 ev.Player.ExplodeGrenade(ignore: true);
         }
 
@@ -192,7 +205,7 @@ namespace RGM.Modes
             if (ev.Player.IsDead)
                 return;
 
-            if (_dict.ContainsKey(ev.Player) && _dict[ev.Player] == BlockedActions.아이템_사용)
+            if (_dict.ContainsKey(ev.Player) && _dict[ev.Player] == BlockedActions.UsingItem)
                 ev.Player.ExplodeGrenade(ignore: true);
         }
 
@@ -201,7 +214,7 @@ namespace RGM.Modes
             if (ev.Player.IsDead)
                 return;
 
-            if (_dict.ContainsKey(ev.Player) && _dict[ev.Player] == BlockedActions.문_상호작용)
+            if (_dict.ContainsKey(ev.Player) && _dict[ev.Player] == BlockedActions.InteractingDoor)
                 ev.Player.ExplodeGrenade(ignore: true);
         }
 
@@ -210,7 +223,7 @@ namespace RGM.Modes
             if (ev.Player.IsDead)
                 return;
 
-            if (_dict.ContainsKey(ev.Player) && _dict[ev.Player] == BlockedActions.발전기_열기)
+            if (_dict.ContainsKey(ev.Player) && _dict[ev.Player] == BlockedActions.OpenGenerator)
                 ev.Player.ExplodeGrenade(ignore: true);
         }
 
@@ -221,13 +234,13 @@ namespace RGM.Modes
 
             if (!_dict.ContainsKey(ev.Player)) return;
             
-            if (_dict[ev.Player] == BlockedActions.카드키_들기 && ev.Item.Type.IsKeycard())
+            if (_dict[ev.Player] == BlockedActions.HeldKeyCard && ev.Item.Type.IsKeycard())
                 ev.Player.ExplodeGrenade(ignore: true);
-
-            if (_dict[ev.Player] == BlockedActions.총_들기 && ev.Item.Type.IsWeapon())
+            
+            if (_dict[ev.Player] == BlockedActions.HeldGun && ev.Item.Type.IsWeapon())
                 ev.Player.ExplodeGrenade(ignore: true);
-
-            if (_dict[ev.Player] == BlockedActions.의료_아이템_들기 && ev.Item.Type.IsMedical())
+            
+            if (_dict[ev.Player] == BlockedActions.HeldMedicalItem && ev.Item.Type.IsMedical())
                 ev.Player.ExplodeGrenade(ignore: true);
         }
 
@@ -236,7 +249,7 @@ namespace RGM.Modes
             if (ev.Player.IsDead)
                 return;
 
-            if (_dict.ContainsKey(ev.Player) && _dict[ev.Player] == BlockedActions.탈출하기)
+            if (_dict.ContainsKey(ev.Player) && _dict[ev.Player] == BlockedActions.Escaping)
                 ev.Player.ExplodeGrenade(ignore: true);
 
             ev.IsAllowed = false;

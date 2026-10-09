@@ -50,7 +50,6 @@ public class Gambler : Ability
         if (!(Owner.IsScpRole() || 
               Owner.Role.Type.ToString().Contains("Flamingo")) ||
             !Owner.IsJumping ||
-            Owner.GetEffect(EffectType.SeveredHands).IsEnabled ||
             !_mutex.WaitOne(1000))
             return;
 

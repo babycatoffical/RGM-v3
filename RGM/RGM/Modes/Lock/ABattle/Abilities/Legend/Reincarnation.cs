@@ -16,7 +16,7 @@ namespace RGM.Modes.Abilities.Legend;
                    사망 판정을 받을 시, 60초간 모든 공격에 무적이 되며, 능력치가 상승합니다.
                    단, 일정 횟수 이상 적 타격에 실패할 시 사망합니다.
                    """, AbilityCategory.Legend, AbilityType.LEGEND_REINCARNATION)]
-public class Reincarnation : Ability
+public class Reincarnation : Ability, IDeathPreventionAbility
 {
     private const float ContractDuration = 60f;
     private const float CooldownDuration = 120f;
@@ -25,7 +25,10 @@ public class Reincarnation : Ability
     private const int MovementBoostIntensity = 40;
     
     private static bool _isDetonatingState;
-    
+
+    // 일반·영웅 사망 방어가 모두 불가능할 때만 소모한다.
+    public int DeathPreventionPriority => 300;
+
     private bool _isContractActive;
     private bool _isCoolingDown;
     private int _hitCount;
@@ -83,7 +86,7 @@ public class Reincarnation : Ability
             return;
         }
 
-        if (TryStartContract())
+        if (DeathPreventionResolver.IsSelected(this, ev.Attacker, ev.DamageHandler.Type) && TryStartContract())
             ev.IsAllowed = false;
     }
 
@@ -100,6 +103,7 @@ public class Reincarnation : Ability
             !_isContractActive &&
             !IsContractExemptDamage(ev.DamageHandler.Type) &&
             IsLethalDamage(ev) &&
+            DeathPreventionResolver.IsSelected(this, ev.Attacker, ev.DamageHandler.Type) &&
             TryStartContract())
         {
             ev.IsAllowed = false;
@@ -115,6 +119,17 @@ public class Reincarnation : Ability
 
         if (_isContractActive && ev.Attacker == Owner)
             ev.DamageHandler.Damage *= 1.35f;
+    }
+
+    public bool CanPreventDeath(Player attacker, DamageType damageType)
+    {
+        if (IsContractExemptDamage(damageType) || WeakPointAttack.ShouldIgnoreDefenses(attacker))
+            return false;
+
+        if (_isContractActive)
+            return true;
+
+        return !_isCoolingDown && !DeathPreventionResolver.IsLifeUsed(Owner);
     }
 
     private void OnHurt(HurtEventArgs ev)

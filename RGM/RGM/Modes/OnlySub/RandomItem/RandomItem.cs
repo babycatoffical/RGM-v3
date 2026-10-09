@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Exiled.API.Enums;
 using Exiled.API.Features;
 using MEC;
 using RGM.API.Features;
@@ -10,19 +11,19 @@ using InventorySystem.Items;
 
 namespace RGM.Modes
 {
-    [Mode(ModeCategory.Public, ModeInfo.Plus, ModeType.RandomItem)]
+    [Mode(ModeCategory.OnlySub, ModeInfo.Plus, ModeType.RandomItem)]
     public class RandomItem : Mode
     {
         private static bool _isEnabled;
         
         public override string Name => "랜덤박스";
-        public override string Description => "15초마다 랜덤한 아이템을 얻을 수 있습니다!";
+        public override string Description => "20초마다 랜덤한 아이템을 얻을 수 있습니다!";
 
         public override string Detail =>
             """
             랜덤 아이템이 지급됩니다.
 
-            이후, 15초마다 무작위 아이템들을 하나 더 받습니다.
+            이후, 20초마다 무작위 아이템들을 하나 더 받습니다.
             """;
 
         public override string Color => "BFFF00";
@@ -56,7 +57,7 @@ namespace RGM.Modes
 
             while (_isEnabled)
             {
-                yield return Timing.WaitForSeconds(15f);
+                yield return Timing.WaitForSeconds(20f);
 
                 foreach (var player in PlayerManager.List.Where(x => x.IsAlive && x.Role.Type != RoleTypeId.Scp079))
                     try
@@ -85,26 +86,27 @@ namespace RGM.Modes
 
         private IEnumerator<float> Spawned(Player player)
         {
-            if (!player.IsAlive)
-                yield break;
-
+            List<ItemType> itemList = [.. Tools.EnumToList<ItemType>().Where(x => !x.IsAmmo())];
+        
             yield return Timing.WaitForOneFrame;
-
+        
+            if (!player.IsAlive || player.Role.Type == RoleTypeId.Scp079)
+                yield break;
+        
+            yield return Timing.WaitForSeconds(0.1f);
             player.ClearInventory();
-            for (int i = 1; i < 7; i++) {
-                player.AddItem(ItemType.Ammo9x19);
-            }
-            for (int i = 1; i < 3; i++)
-            {
-                player.AddItem(ItemType.Ammo556x45);
-                player.AddItem(ItemType.Ammo762x39);
-                player.AddItem(ItemType.Ammo12gauge);
-                player.AddItem(ItemType.Ammo44cal);
-            }
+
+            // 탄약 아이템은 인벤토리 슬롯을 점유하므로, 예비 탄약으로 직접 지급합니다.
+            // 아래 랜덤 아이템 6개가 슬롯 부족으로 누락되지 않도록 합니다.
+            player.AddAmmo(AmmoType.Nato9, 90);
+            player.AddAmmo(AmmoType.Nato556, 60);
+            player.AddAmmo(AmmoType.Nato762, 60);
+            player.AddAmmo(AmmoType.Ammo12Gauge, 16);
+            player.AddAmmo(AmmoType.Ammo44Cal, 10);
+
             for (int i = 1; i < 7; i++)
             {
-                List<ItemType> itemList = Tools.EnumToList<ItemType>();
-                ItemType item = itemList.GetRandomValue();
+                var item = itemList.GetRandomValue();
                 
                 player.AddItem(item);
 

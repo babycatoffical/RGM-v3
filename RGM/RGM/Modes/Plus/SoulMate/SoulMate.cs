@@ -100,7 +100,7 @@ namespace RGM.Modes
                     if (_soulMates[sm] != null) continue;
                     Player soulMate = _soulMates[sm];
 
-                    _soulMates.Remove(soulMate);
+                    if (soulMate != null) _soulMates.Remove(soulMate);
                     _soulMates.Remove(sm);
 
                     sm.AddHint("소울메이트 매칭", "누군가와의 매칭이 해제되었습니다.", 1.2f);

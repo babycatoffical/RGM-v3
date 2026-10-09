@@ -31,8 +31,8 @@ namespace RGM.Modes;
 [Mode(ModeCategory.Public, ModeInfo.Lock, ModeType.ABattle)]
 public class ABattle : Mode
 {
-    public override string Name => "워크스테이션 업그레이드";
-    public override string Description => "워크스테이션에서 업그레이드하세요!";
+    public override string Name => "연두색 강화 뛰기";
+    public override string Description => "작업대에서 강화 뛰기를 하세요!";
 
     public override string Detail =>
         """
@@ -118,13 +118,13 @@ public class ABattle : Mode
     public static readonly Dictionary<string, string> ExtraModes = new()
     {
         { "기본", "워크스테이션 업그레이드를 즐기세요!" },
-        { "치매", "33% 확률로 획득했던 워크스테이션에서 능력을 다시 획득할 수 있습니다."},
+        { "치매", "32% 확률로 획득했던 워크스테이션에서 능력을 다시 획득할 수 있습니다."},
         //{ "반사경", "능력 획득 시, 40% 확률로 능력이 복제됩니다." },
         { "수저", "능력 선택창에서 등장하는 능력의 수가 최대 5개까지 늘어날 수 있습니다." },
         { "전주곡",
             $"""
              스폰 즉시 <color={RatingColor["영웅"]}>영웅</color> 등급의 능력을 얻습니다.
-             30% 확률로 프리즘이 활성화되며, 이때 15% 확률로 <color={RatingColor["전설"]}>전설</color>, 1% 확률로 <color={RatingColor["신화"]}>신화</color> 등급의 능력을 얻습니다.
+             25% 확률로 프리즘이 활성화되며, 이때 15% 확률로 <color={RatingColor["전설"]}>전설</color>, 1% 확률로 <color={RatingColor["신화"]}>신화</color> 등급의 능력을 얻습니다.
              """
         },
         { "잔칫상", $"<color={RatingColor["희귀"]}>희귀</color> 이상 등급의 능력이 등장할 확률이 높아집니다." },
@@ -132,9 +132,11 @@ public class ABattle : Mode
         { "캐시 청소", "8분마다 모든 유저의 워크스테이션 획득 기록이 초기화됩니다." },
         { "대출", "워크스테이션 제한이 해제됩니다. 각 워크스테이션마다 처음 1회를 제외하고 추가로 얻으려고 시도하는 경우, 18% 확률로 아사합니다." },
         { "지원", "1~3분마다 모두에게 능력 선택창이 열립니다." },
-        {
-            "난장판", "유령이 시스템을 장악하여 난장판이 되었습니다. 이로 인해 관리자의 제약이 모두 풀립니다.\n" +
-                   "아, 빼먹은 것이 있군요. <b><color=#FF5F1F>HYPER BURNING</color></b>이 활성화됩니다.\n"
+        { "난장판", 
+            """
+               유령이 시스템을 장악하여 난장판이 되었습니다. 이로 인해 관리자의 제약이 모두 풀립니다.
+               아, 빼먹은 것이 있군요. <b><color=#FF5F1F>HYPER BURNING</color></b>이 활성화됩니다.
+               """
         }
     };
 
@@ -822,9 +824,11 @@ public class ABattle : Mode
 
         ability.Data = abilityData;
         ability.Owner = player;
-        ability.OnEnabled();
-
         PlayerAbilities[player].Add(ability);
+
+        // OnEnabled에서 다른 능력을 추가하면 시너지 검사가 다시 실행된다.
+        // 현재 능력을 먼저 등록해 두어, 자기 자신을 다시 부여하는 재진입을 방지한다.
+        ability.OnEnabled();
         EnableSynergyAbility(player);
 
         string styleName = ColorFormat(abilityData.GetFormattedName());
@@ -941,9 +945,11 @@ public class ABattle : Mode
 
                 ability.Data = abilityData;
                 ability.Owner = player;
-                ability.OnEnabled();
-
                 PlayerAbilities[player].Add(ability);
+
+                // OnEnabled에서 다른 능력을 추가하면 시너지 검사가 다시 실행된다.
+                // 현재 능력을 먼저 등록해 두어, 자기 자신을 다시 부여하는 재진입을 방지한다.
+                ability.OnEnabled();
                 EnableSynergyAbility(player);
 
                 string styleName = ColorFormat(abilityData.GetFormattedName());
@@ -1232,8 +1238,8 @@ public class ABattle : Mode
         {
             player.RemoveAbility(AbilityType.RARE_TRANSITION);
 
-            var transition = Convert.ToByte(Random.Range(1, 101)) <= 4 * player.AbilityCount(AbilityType.NORMAL_HEREDITY) +
-                (CurrentExtraModes.Contains("잔칫상") ? 40 : 25);
+            var transition = Convert.ToByte(Random.Range(1, 101)) <= Mathf.Min(80,
+                4 * player.AbilityCount(AbilityType.NORMAL_HEREDITY) + (CurrentExtraModes.Contains("잔칫상") ? 40 : 25));
 
             if (transition)
             {
@@ -1249,8 +1255,8 @@ public class ABattle : Mode
         {
             player.RemoveAbility(AbilityType.EPIC_TRANSITION);
 
-            var transition = Convert.ToByte(Random.Range(1, 101)) <= 4 * player.AbilityCount(AbilityType.NORMAL_HEREDITY) + 
-                (CurrentExtraModes.Contains("잔칫상") ? 40 : 25);
+            var transition = Convert.ToByte(Random.Range(1, 101)) <= Mathf.Min(80,
+                4 * player.AbilityCount(AbilityType.NORMAL_HEREDITY) + (CurrentExtraModes.Contains("잔칫상") ? 40 : 25));
 
             if (transition)
             {
@@ -1266,8 +1272,8 @@ public class ABattle : Mode
         {
             player.RemoveAbility(AbilityType.LEGEND_TRANSITION);
 
-            var transition = Convert.ToByte(Random.Range(1, 101)) <= 4 * player.AbilityCount(AbilityType.NORMAL_HEREDITY) + 
-                (CurrentExtraModes.Contains("잔칫상") ? 40 : 25);
+            var transition = Convert.ToByte(Random.Range(1, 101)) <= Mathf.Min(80,
+                4 * player.AbilityCount(AbilityType.NORMAL_HEREDITY) + (CurrentExtraModes.Contains("잔칫상") ? 40 : 25));
 
             if (transition)
             {
@@ -1475,35 +1481,53 @@ public class ABattle : Mode
         }
     }
 
+    private static readonly (AbilityCategory Category, int Weight)[] DefaultCategoryWeights =
+    [
+        (AbilityCategory.Ancient, 1),
+        (AbilityCategory.Mythic, 9),
+        (AbilityCategory.Legend, 40),
+        (AbilityCategory.Epic, 1100),
+        (AbilityCategory.Rare, 5220),
+        (AbilityCategory.Normal, 13630)
+    ];
+
+    private static readonly (AbilityCategory Category, int Weight)[] FeastCategoryWeights =
+    [
+        (AbilityCategory.Ancient, 2),
+        (AbilityCategory.Mythic, 28),
+        (AbilityCategory.Legend, 110),
+        (AbilityCategory.Epic, 1830),
+        (AbilityCategory.Rare, 5746),
+        (AbilityCategory.Normal, 12284)
+    ];
+
     public static AbilityCategory GetCategory(Player player, bool allowAncient = true)
     {
         if (!player.IsAlive) return AbilityCategory.Dummy;
 
-        var random = Convert.ToUInt16(Random.Range(1, 20001)); // 0.005 단위
-        var hasBlackMarket = player.HasAbility(AbilityType.SYNERGY_BLACKMARKET);
+        var weights = CurrentExtraModes.Contains("잔칫상")
+            ? FeastCategoryWeights
+            : DefaultCategoryWeights;
+        var canGetAncient = allowAncient && !player.HasAbility(AbilityType.SYNERGY_BLACKMARKET);
+        var ancientWeight = weights[0].Weight;
+        var roll = Random.Range(0, weights.Sum(x => x.Weight));
+        var cumulativeWeight = 0;
 
-        if (CurrentExtraModes.Contains("잔칫상"))
+        foreach (var (category, weight) in weights)
         {
-            return random switch
-            {
-                <= 2 when allowAncient && !hasBlackMarket => AbilityCategory.Ancient, // 0.010
-                <= 30 => AbilityCategory.Mythic, // 0.150
-                <= 140 => AbilityCategory.Legend, // 0.700
-                <= 1970 => AbilityCategory.Epic, // 9.850
-                <= 7716 => AbilityCategory.Rare, // 38.580
-                _ => AbilityCategory.Normal // 50.710
-            };
+            if (category == AbilityCategory.Ancient && !canGetAncient)
+                continue;
+
+            // 고대 획득이 불가능하면 기존 로직과 동일하게 그 확률을 신화에 합산한다.
+            cumulativeWeight += category == AbilityCategory.Mythic && !canGetAncient
+                ? weight + ancientWeight
+                : weight;
+
+            if (roll < cumulativeWeight)
+                return category;
         }
 
-        return random switch
-        {
-            1 when allowAncient && !hasBlackMarket => AbilityCategory.Ancient, // 0.005
-            <= 10 => AbilityCategory.Mythic, // 0.050
-            <= 50 => AbilityCategory.Legend, // 0.250
-            <= 1150 => AbilityCategory.Epic, // 5.750
-            <= 6370 => AbilityCategory.Rare, // 31.850
-            _ => AbilityCategory.Normal // 62.405
-        };
+        return AbilityCategory.Normal;
     }
 
     private static byte GetRoleAbilityChance(AbilityCategory category)
@@ -1511,12 +1535,11 @@ public class ABattle : Mode
         return category switch
         {
             AbilityCategory.Ancient => 40,
-            AbilityCategory.Mythic => 25,
-            AbilityCategory.Legend => 20,
-            AbilityCategory.Epic => 15,
-            AbilityCategory.Rare => 10,
-            AbilityCategory.Normal => 5,
-            _ => 5
+            AbilityCategory.Mythic => 20,
+            AbilityCategory.Legend => 15,
+            AbilityCategory.Epic => 12,
+            AbilityCategory.Rare => 9,
+            _ => 6
         };
     }
 
@@ -1662,7 +1685,7 @@ public class ABattle : Mode
                         ? AbilityCategory.Mythic : AbilityCategory.Legend : AbilityCategory.Epic;
             }
             
-            if (isPrismRand <= 30)
+            if (isPrismRand <= 25)
             {
                 player.AddBroadcast(10, "<b><size=25><color=#D23265>프리즘 전주곡 활성화</color></size></b>");
                 player.AddAbility(Instance.GetRandomAbilities(player, GetPrismRandom(), 1,

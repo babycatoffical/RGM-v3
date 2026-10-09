@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Exiled.API.Features;
 using MEC;
@@ -10,6 +11,7 @@ using RGM.API.Features;
 using PlayerRoles;
 using RGM.API.DataBases;
 using Exiled.API.Extensions;
+using Random = UnityEngine.Random;
 
 namespace RGM.Modes
 {
@@ -24,17 +26,29 @@ namespace RGM.Modes
 
 배틀그라운드와 흡사하죠.</b>
 """;
-        public override string Color => "000000";
+        public override string Color => "333333";
 
         public static Tomb Instance;
 
-        List<Player> pl = new List<Player>();
+        private readonly List<Player> _player = [];
+        private readonly List<ItemType> _ignoreItems = 
+        [
+            ItemType.Snowball,
+            ItemType.Coal,
+            ItemType.SpecialCoal,
+            ItemType.SCP1507Tape,
+            ItemType.SCP244a,
+            ItemType.SCP244b,
+            ItemType.SCP018,
+            ItemType.SCP2176,
+            ItemType.SCP1576
+        ];
 
-        CoroutineHandle _onModeStarted;
+        private CoroutineHandle _onModeStarted;
 
-        Vector3 RandomPosition()
+        private static Vector3 RandomPosition()
         {
-            return new Vector3(UnityEngine.Random.Range(-44.64675f, 54.59153f), 336, UnityEngine.Random.Range(-95.17068f, 3.98947f));
+            return new Vector3(Random.Range(45, 144), 350, Random.Range(-95, 4));
         }
 
         public override void OnEnabled()
@@ -55,32 +69,35 @@ namespace RGM.Modes
             Timing.KillCoroutines(_onModeStarted);
         }
 
-        public IEnumerator<float> OnModeStarted()
+        private IEnumerator<float> OnModeStarted()
         {
             Tools.LoadMap($"plane");
 
-            PlayerManager.List.CopyTo(pl);
+            PlayerManager.List.CopyTo(_player);
 
-            List<ItemType> ItemTypes = Tools.EnumToList<ItemType>().Where(x => !Datas.ExceptItems.Contains(x)).ToList();
-            List<ItemType> ammoTypes = Tools.EnumToList<ItemType>().Where(x => x.IsAmmo()).ToList();
+            var itemTypes = Tools.EnumToList<ItemType>()
+                .Where(x => !_ignoreItems.Contains(x))
+                .ToList();
+            var ammoTypes = Tools.EnumToList<ItemType>().Where(x => x.IsAmmo()).ToList();
 
-            for (int i = 1; i <= 1205; i++)
+            for (int i = 1; i <= 999; i++)
             {
                 try
                 {
-                    Item item = Item.Create(ItemTypes.GetRandomValue());
+                    Item item = Item.Create(itemTypes.GetRandomValue());
 
                     if (item is Firearm firearm)
                         firearm.MagazineAmmo = firearm.MaxMagazineAmmo;
 
                     item.CreatePickup(RandomPosition());
                 }
-                catch
+                catch (Exception e)
                 {
+                    Log.Error($"Mod Error: {e}");
                 }
             }
 
-            for (int i = 1; i <= 400; i++)
+            for (int i = 1; i <= 357; i++)
             {
                 try
                 {
@@ -88,8 +105,9 @@ namespace RGM.Modes
 
                     item.CreatePickup(RandomPosition());
                 }
-                catch
+                catch (Exception e)
                 {
+                    Log.Error($"Mod Error: {e}");
                 }
             }
 
@@ -100,37 +118,42 @@ namespace RGM.Modes
                     player.Role.Set(RoleTypeId.Tutorial);
                     player.Position = RandomPosition();
                 }
-                catch
+                catch (Exception e)
                 {
+                    Log.Error($"Mod Error: {e}");
                 }
             }
             yield return 0f;
             
             yield return Timing.WaitForSeconds(120f);
 
-            Player BusterCall = PlayerManager.List.Where(x => x.IsAlive).ToList().GetRandomValue();
+            GameObject busterCall = GameObject.Find("[SP] Base");
+            
+            if (busterCall == null)
+            {
+                Log.Error("[SpearShield] [SP] Base 스폰 지점을 찾지 못했습니다.");
+                yield break;
+            }
 
+            var busterCallPosition = busterCall.transform.position;
+            
             foreach (var player in PlayerManager.List)
             {
-                player.Position = BusterCall.Position;
+                player.Position = busterCallPosition;
                 player.AddBroadcast(20, "<b><size=30>[<color=yellow>버스터콜</color>]</size></b>\n<size=20>모두가 한자리에 모입니다.</size>");
             }
         }
 
-        public void OnDied(Exiled.Events.EventArgs.Player.DiedEventArgs ev)
+        private void OnDied(Exiled.Events.EventArgs.Player.DiedEventArgs ev)
         {
-            if (pl.Contains(ev.Player))
-            {
-                pl.Remove(ev.Player);
+            if (!_player.Contains(ev.Player)) return;
+            _player.Remove(ev.Player);
 
-                if (pl.Count() < 2)
-                {
-                    Round.IsLocked = false;
+            if (_player.Count >= 2) return;
+            Round.IsLocked = false;
 
-                    PlayerManager.List.ToList().ForEach(x => x.AddBroadcast(20, $"승리자 : {pl[0].DisplayNickname}"));
-                    Timing.RunCoroutine(Tools.SetWinner(new List<Player>() { pl[0] }, 5));
-                }
-            }
+            PlayerManager.List.ToList().ForEach(x => x.AddBroadcast(20, $"승리자 : {_player[0].DisplayNickname}"));
+            Timing.RunCoroutine(Tools.SetWinner([_player[0]], 5));
         }
     }
 }
